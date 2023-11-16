@@ -1,90 +1,53 @@
+import { type DialOptions } from '@viamrobotics/rpc/src/dial';
 import * as VIAM from '@viamrobotics/sdk';
 
-async function connect(): Promise<VIAM.RobotClient> {
-  // You can remove this block entirely if your robot is not authenticated.
-  // Otherwise, replace with an actual secret.
-  const secret = '<SECRET>';
+async function connect(): Promise<VIAM.ViamClient> {
   const credential = {
-    payload: secret,
-    type: 'robot-location-secret',
+    payload: '<API-KEY>',
+    type: 'api-key',
   };
 
-  // Replace with the host of your actual robot running Viam.
-  const host = '<HOST>';
+  const dialOpts: DialOptions = {
+    authEntity: '<API-KEY-ID>',
+    credentials: credential,
+  };
 
-  // Replace with the signaling address. If you are running your robot on Viam,
-  // it is most likely https://app.viam.com:443.
-  const signalingAddress = '<SIGNALING ADDRESS>';
+  const client = new VIAM.ViamClient(dialOpts);
+  await client.connect();
 
-  // You can replace this with a different ICE server, append additional ICE
-  // servers, or omit entirely. This option is not strictly required but can
-  // make it easier to connect via WebRTC.
-  const iceServers = [{ urls: 'stun:global.stun.twilio.com:3478' }];
-
-  return VIAM.createRobotClient({
-    host,
-    credential,
-    authEntity: host,
-    signalingAddress,
-    iceServers,
-    // optional: configure reconnection options
-    reconnectMaxAttempts: 7,
-    reconnectMaxWait: 1000,
-  });
+  return client;
 }
 
-function button() {
-  return <HTMLButtonElement>document.getElementById('main-button');
-}
+const button = <HTMLButtonElement>document.getElementById('main-button');
 
-// This function runs a motor component with a given name on your robot.
-// Feel free to replace it with whatever logic you want to test out!
-async function run(client: VIAM.RobotClient) {
-  // Replace with the name of a motor on your robot.
-  const name = '<MOTOR NAME>';
-  const mc = new VIAM.MotorClient(client, name);
+async function run(client: VIAM.ViamClient) {
+  // A filter is an optional tool to filter out which data comes back.
+  const opts: VIAM.FilterOptions = { componentType: 'camera' };
+  const filter = client.dataClient.createFilter(opts);
 
   try {
-    button().disabled = true;
+    button.disabled = true;
+    const textElement = <HTMLParagraphElement>document.getElementById('text');
+    textElement.innerHTML = 'waiting for data...';
 
-    console.log(await mc.getPosition());
-    await mc.goFor(100, 10);
-    console.log(await mc.getPosition());
+    const dataList = await client.dataClient.tabularDataByFilter(filter);
+    textElement.innerHTML = JSON.stringify(dataList, null, 2);
   } finally {
-    button().disabled = false;
+    button.disabled = false;
   }
-}
-
-// This function is called when the robot is disconnected.
-// Feel free to replace it with whatever logic you want to test out!
-async function disconnected(event) {
-  console.log('The robot has been disconnected. Trying reconnect...');
-}
-
-// This function is called when the robot is reconnected.
-// Feel free to replace it with whatever logic you want to test out!
-async function reconnected(event) {
-  console.log('The robot has been reconnected. Work can be continued.');
 }
 
 async function main() {
-  // Connect to client
-  let client: VIAM.RobotClient;
-  try {
-    client = await connect();
-    console.log('connected!');
-    client.on('disconnected', disconnected);
-    client.on('reconnected', reconnected);
-  } catch (error) {
-    console.log(error);
-    return;
-  }
+    // Hardcoded percentage for time spent standing (example)
+    const percentageStanding = 75;
+       
+    // Get and display the current date
+    const currentDate = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('currentDate').innerHTML = `${currentDate.toLocaleDateString('en-US', options)}`;
 
-  // Make the button in our app do something interesting
-  button().onclick = async () => {
-    await run(client);
-  };
-  button().disabled = false;
+    // Display the percentage on the webpage
+    document.getElementById('standingPercentage').innerHTML = `You have spent ${percentageStanding}% of your time standing today.`;
 }
 
 main();

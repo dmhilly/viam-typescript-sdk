@@ -26,19 +26,7 @@
     <div id="currentDate"></div>
     <div id="standingPercentage"></div>
 
-    <script>
-        // Hardcoded percentage for time spent standing (example)
-        const percentageStanding = 75;
-        
-	// Get and display the current date
-        const currentDate = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('currentDate').innerHTML = `${currentDate.toLocaleDateString('en-US', options)}`;
-
-        // Display the percentage on the webpage
-        document.getElementById('standingPercentage').innerHTML = `You have spent ${percentageStanding}% of your time standing today.`;
-
-    </script>
+    <script src="main.js"></script>
 </body>
 </html>
 
