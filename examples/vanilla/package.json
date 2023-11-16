@@ -2,7 +2,6 @@
   "name": "@viamrobotics/vanilla-sdk-example",
   "description": "A framework-free example application that demonstrates how to connect to a robot using @viamrobotics/sdk",
   "scripts": {
-    "preinstall": "make -C ../.. build",
     "start": "esbuild ./src/main.ts --bundle --outfile=static/main.js --servedir=static",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,6 +11,6 @@
     "esbuild": "0.16.12"
   },
   "dependencies": {
-    "@viamrobotics/sdk": "file:../.."
+    "@viamrobotics/sdk": "^0.7.0"
   }
 }
